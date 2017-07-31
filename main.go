@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	var web_port = flag.Int("web_port", 8080, "web port")
 	var host = flag.String("host", "localhost", "db host")
 	var port = flag.Int("port", 3306, "db port")
 	var user = flag.String("user", "root", "db user")
@@ -19,6 +20,6 @@ func main() {
 		Password: *password,
 		Database: *database,
 	}
-	server.Run(db_data)
+	server.Run(*web_port, db_data)
 }
 

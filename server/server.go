@@ -3,13 +3,15 @@ package server
 import (
 	"log"
 	"net/http"
+	"strconv"
 )
 
-func Run(db Db_data) {
+func Run(web_port int, db Db_data) {
 	handler := Handler{}
 	http.Handle("/point", handler)
 	http.HandleFunc("/countries",  get_countries)
-	res := http.ListenAndServe(":8080", nil)
+	address := ":" + strconv.Itoa(web_port)
+	res := http.ListenAndServe(address, nil)
 	log.Fatal(res)
 }
 
