@@ -16,11 +16,21 @@ func Run(web_port int, db Db_data) {
 }
 
 type Handler struct {
+	db Db_data
 }
 
 func (h Handler) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
+	lst := get_countries_from_database(h.db)
+	writer.Write(lst)
 }
 
-func get_countries(resp http.ResponseWriter, req *http.Request) {
+func get_countries(writer http.ResponseWriter, request *http.Request) {
+}
+
+func get_countries_from_database(db Db_data) []byte {
+	res := make([]byte, 0)
+	res = append(res, []byte("c1\n")...)
+	res = append(res, []byte("c2\n")...)
+	return res
 }
 
