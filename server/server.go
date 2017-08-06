@@ -7,7 +7,7 @@ import (
 )
 
 func Run(web_port int, db Db_data) {
-	handler := Handler{}
+	handler := Handler{db}
 	http.Handle("/point", handler)
 	http.HandleFunc("/countries",  get_countries)
 	address := ":" + strconv.Itoa(web_port)
