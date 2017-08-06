@@ -23,17 +23,40 @@ type Handler struct {
 }
 
 func (h Handler) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
-	lst := get_countries_from_database(h.db)
-	writer.Write(lst)
+	countries := get_countries_from_database(h.db)
+	res := build_countries_response(countries)
+	writer.Write(res)
 }
 
 func get_countries(writer http.ResponseWriter, request *http.Request) {
 }
 
-func get_countries_from_database(db *sql.DB) []byte {
-	res := make([]byte, 0)
-	res = append(res, []byte("c1\n")...)
-	res = append(res, []byte("c2\n")...)
-	return res
+func get_countries_from_database(db *sql.DB) []string {
+	countries := make([]string, 0)
+	rows, err := db.Query("select country from countries")
+	if err != nil {
+		return countries
+	}
+	defer rows.Close()
+	countries = extract_countries_from_db_result(rows)
+	return countries
+}
+
+func extract_countries_from_db_result(rows *sql.Rows) []string {
+	countries := make([]string, 0)
+	for rows.Next() {
+		var country string
+		err := rows.Scan(&country)
+		if err != nil {
+			log.Printf("extract country error: %v", err)
+			continue
+		}
+		countries = append(countries, country)
+	}
+	return countries
+}
+
+func build_countries_response(countries []string) []byte {
+	return nil
 }
 
