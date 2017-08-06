@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -25,7 +26,12 @@ type Handler struct {
 func (h Handler) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
 	countries := get_countries_from_database(h.db)
 	res := build_countries_response(countries)
-	writer.Write(res)
+	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	writer.WriteHeader(http.StatusOK)
+	err := json.NewEncoder(writer).Encode(res)
+	if err != nil {
+		log.Printf("json encode error: %v", err)
+	}
 }
 
 func get_countries(writer http.ResponseWriter, request *http.Request) {
@@ -61,11 +67,10 @@ func extract_countries_from_db_result(rows *sql.Rows) []string {
 	return countries
 }
 
-func build_countries_response(countries []string) []byte {
-	res := make([]byte, 0)
+func build_countries_response(countries []string) Countries {
+	res := make(Countries, 0)
 	for _, country := range countries {
-		res = append(res, []byte(country)...)
-		res = append(res, []byte("\n")...)
+		res = append(res, Country{country})
 	}
 	return res
 }
