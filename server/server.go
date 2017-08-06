@@ -62,6 +62,11 @@ func extract_countries_from_db_result(rows *sql.Rows) []string {
 }
 
 func build_countries_response(countries []string) []byte {
-	return nil
+	res := make([]byte, 0)
+	for _, country := range countries {
+		res = append(res, []byte(country)...)
+		res = append(res, []byte("\n")...)
+	}
+	return res
 }
 
