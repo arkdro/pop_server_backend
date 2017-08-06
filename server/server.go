@@ -39,6 +39,10 @@ func get_countries_from_database(db *sql.DB) []string {
 	}
 	defer rows.Close()
 	countries = extract_countries_from_db_result(rows)
+	err = rows.Err()
+	if err != nil {
+		log.Printf("get countries db error: %v", err)
+	}
 	return countries
 }
 
