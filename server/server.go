@@ -33,7 +33,8 @@ func get_countries(writer http.ResponseWriter, request *http.Request) {
 
 func get_countries_from_database(db *sql.DB) []string {
 	countries := make([]string, 0)
-	rows, err := db.Query("select country from countries")
+	cmd := "SELECT DISTINCT country FROM country_median_age ORDER BY country"
+	rows, err := db.Query(cmd)
 	if err != nil {
 		return countries
 	}
