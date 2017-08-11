@@ -10,7 +10,7 @@ import (
 
 func Run(web_port int, db Db_data) {
 	dbh := Db_connect(db)
-	handler := Handler{dbh}
+	handler := Point_handler{dbh}
 	http.Handle("/point", handler)
 	http.HandleFunc("/countries",  get_countries)
 	address := ":" + strconv.Itoa(web_port)
@@ -19,11 +19,11 @@ func Run(web_port int, db Db_data) {
 	Db_disconnect(dbh)
 }
 
-type Handler struct {
+type Point_handler struct {
 	db *sql.DB
 }
 
-func (h Handler) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
+func (h Point_handler) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
 	countries := get_countries_from_database(h.db)
 	res := build_countries_response(countries)
 	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
