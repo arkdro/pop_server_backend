@@ -10,8 +10,8 @@ import (
 
 func Run(web_port int, db Db_data) {
 	dbh := Db_connect(db)
-	handler := Point_handler{dbh}
-	http.Handle("/point", handler)
+	point := Point_handler{dbh}
+	http.Handle("/point", point)
 	http.HandleFunc("/countries",  get_countries)
 	address := ":" + strconv.Itoa(web_port)
 	res := http.ListenAndServe(address, nil)
