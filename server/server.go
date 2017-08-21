@@ -12,7 +12,10 @@ func Run(web_port int, db Db_data) {
 	dbh := Db_connect(db)
 	point := Point_handler{dbh}
 	http.Handle("/point", point)
-	http.HandleFunc("/countries",  get_countries)
+	http.HandleFunc("/countries",
+		func(writer http.ResponseWriter, req *http.Request) {
+			get_countries(writer, req, dbh)
+		})
 	address := ":" + strconv.Itoa(web_port)
 	res := http.ListenAndServe(address, nil)
 	log.Fatal(res)
@@ -34,7 +37,9 @@ func (h Point_handler) ServeHTTP(writer http.ResponseWriter, req *http.Request) 
 	}
 }
 
-func get_countries(writer http.ResponseWriter, request *http.Request) {
+func get_countries(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
+	handler := Point_handler{dbh}
+	handler.ServeHTTP(writer, request)
 }
 
 func get_countries_from_database(db *sql.DB) []string {
