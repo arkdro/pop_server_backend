@@ -13,7 +13,7 @@ import (
 func Run(web_port int, db Db_data) {
 	dbh := Db_connect(db)
 	r := mux.NewRouter()
-	r.HandleFunc("/point",
+	r.HandleFunc("/point/{country}/{year}",
 		func(writer http.ResponseWriter, req *http.Request) {
 			get_point(writer, req, dbh)
 		})
@@ -64,6 +64,10 @@ func get_country(writer http.ResponseWriter, request *http.Request, dbh *sql.DB)
 
 func get_point(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
 	log.Printf("get_point")
+	vars := mux.Vars(request)
+	country := vars["country"]
+	year := vars["year"]
+	log.Printf("get_point, %v, %v", country, year)
 	handler := Point_handler{dbh}
 	handler.ServeHTTP(writer, request)
 }
