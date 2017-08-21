@@ -17,9 +17,13 @@ func Run(web_port int, db Db_data) {
 		func(writer http.ResponseWriter, req *http.Request) {
 			get_point(writer, req, dbh)
 		})
-	r.HandleFunc("/countries",
+	r.HandleFunc("/country",
 		func(writer http.ResponseWriter, req *http.Request) {
 			get_countries(writer, req, dbh)
+		})
+	r.HandleFunc("/country/{country}",
+		func(writer http.ResponseWriter, req *http.Request) {
+			get_country(writer, req, dbh)
 		})
 	http.Handle("/", r)
 	address := ":" + strconv.Itoa(web_port)
@@ -45,6 +49,15 @@ func (h Point_handler) ServeHTTP(writer http.ResponseWriter, req *http.Request) 
 
 func get_countries(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
 	log.Printf("get_countries")
+	handler := Point_handler{dbh}
+	handler.ServeHTTP(writer, request)
+}
+
+func get_country(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
+	log.Printf("get_country")
+	vars := mux.Vars(request)
+	c := vars["country"]
+	log.Printf("get_country, %v", c)
 	handler := Point_handler{dbh}
 	handler.ServeHTTP(writer, request)
 }
