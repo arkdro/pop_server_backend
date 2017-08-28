@@ -25,9 +25,8 @@ func Run(web_port int, db Db_data) {
 		func(writer http.ResponseWriter, req *http.Request) {
 			get_country(writer, req, dbh)
 		})
-	http.Handle("/", r)
 	address := ":" + strconv.Itoa(web_port)
-	res := http.ListenAndServe(address, nil)
+	res := http.ListenAndServe(address, r)
 	log.Fatal(res)
 	Db_disconnect(dbh)
 }
