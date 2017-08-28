@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -59,6 +60,15 @@ func write_response_point(writer http.ResponseWriter, req *http.Request, data Po
 	}
 }
 
+func write_response_points(writer http.ResponseWriter, req *http.Request, data Points) {
+	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	writer.WriteHeader(http.StatusOK)
+	err := json.NewEncoder(writer).Encode(data)
+	if err != nil {
+		log.Printf("json encode points error: %v", err)
+	}
+}
+
 func get_countries(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
 	log.Printf("get_countries")
 	handler := Point_handler{dbh}
@@ -68,10 +78,10 @@ func get_countries(writer http.ResponseWriter, request *http.Request, dbh *sql.D
 func get_country(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
 	log.Printf("get_country")
 	vars := mux.Vars(request)
-	c := vars["country"]
-	log.Printf("get_country, %v", c)
-	handler := Point_handler{dbh}
-	handler.ServeHTTP(writer, request)
+	country := vars["country"]
+	log.Printf("get_country, %v", country)
+	data := build_data_points(dbh, country)
+	write_response_points(writer, request, data)
 }
 
 func get_point(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
@@ -88,6 +98,17 @@ func get_point(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
 		data = build_data_point(dbh, country, year)
 	}
 	write_response_point(writer, request, data)
+}
+
+func build_data_points(db *sql.DB, country string) Points {
+	var points Points
+	cmd := "SELECT country_code, year, age FROM country_median_age where country = ?"
+	rows, err := db.Query(cmd, country)
+	if err != nil {
+		return points
+	}
+	points = extract_data_points_from_db_result(rows)
+	return points
 }
 
 func build_data_point(db *sql.DB, country string, year int) Point {
@@ -131,6 +152,40 @@ func extract_countries_from_db_result(rows *sql.Rows) []string {
 		countries = append(countries, country)
 	}
 	return countries
+}
+
+func extract_data_points_from_db_result(rows *sql.Rows) Points {
+	points := make(Points, 0)
+	for rows.Next() {
+		var code string
+		var date string
+		var age float64
+		err := rows.Scan(&code, &date, &age)
+		if err != nil {
+			log.Printf("extract one of points error: %v", err)
+			continue
+		}
+		point := build_one_point(date, age)
+		points = append(points, point)
+	}
+	return points
+}
+
+func build_one_point(date string, age float64) Point {
+	log.Printf("build_one_point: %v, %v", date, age)
+	re := regexp.MustCompile("^(\\d+)-")
+	years := re.FindStringSubmatch(date)
+	year, err := strconv.Atoi(years[1])
+	var point Point
+	if err != nil {
+		log.Printf("build_one_point, wrong date, %v", years)
+	} else {
+		point = Point{
+			Year: year,
+			Value: age,
+		}
+	}
+	return point
 }
 
 func extract_data_point_from_db_result(year int, row *sql.Row) Point {
