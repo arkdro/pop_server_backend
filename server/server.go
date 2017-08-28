@@ -38,9 +38,22 @@ type Point_handler struct {
 func (h Point_handler) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
 	countries := get_countries_from_database(h.db)
 	res := build_countries_response(countries)
+	write_response_countries(writer, req, res)
+}
+
+func write_response_countries(writer http.ResponseWriter, req *http.Request, data Countries) {
 	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	writer.WriteHeader(http.StatusOK)
-	err := json.NewEncoder(writer).Encode(res)
+	err := json.NewEncoder(writer).Encode(data)
+	if err != nil {
+		log.Printf("json encode error: %v", err)
+	}
+}
+
+func write_response_point(writer http.ResponseWriter, req *http.Request, data Point) {
+	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	writer.WriteHeader(http.StatusOK)
+	err := json.NewEncoder(writer).Encode(data)
 	if err != nil {
 		log.Printf("json encode error: %v", err)
 	}
