@@ -65,10 +65,24 @@ func get_point(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
 	log.Printf("get_point")
 	vars := mux.Vars(request)
 	country := vars["country"]
-	year := vars["year"]
-	log.Printf("get_point, %v, %v", country, year)
-	handler := Point_handler{dbh}
-	handler.ServeHTTP(writer, request)
+	year_str := vars["year"]
+	log.Printf("get_point, %v, %v", country, year_str)
+	year, err := strconv.Atoi(year_str)
+	var data Point
+	if err != nil {
+		log.Printf("get_point, wrong year, %v", year_str)
+	} else {
+		data = build_data_point(dbh, country, year)
+	}
+	write_response_point(writer, request, data)
+}
+
+func build_data_point(db *sql.DB, country string, year int) Point {
+	var data Point
+	cmd := "SELECT country_code, age FROM country_median_age where country = $1 and year = $2"
+	row := db.QueryRow(cmd, country, year)
+	data = extract_data_point_from_db_result(year, row)
+	return data
 }
 
 func get_countries_from_database(db *sql.DB) []string {
@@ -99,6 +113,22 @@ func extract_countries_from_db_result(rows *sql.Rows) []string {
 		countries = append(countries, country)
 	}
 	return countries
+}
+
+func extract_data_point_from_db_result(year int, row *sql.Row) Point {
+	var data Point
+	var code string
+	var age float64
+	err := row.Scan(&code, &age)
+	if err != nil {
+		log.Printf("extract data point error: %v", err)
+	} else {
+		data = Point{
+			Year: year,
+			Value: age,
+		}
+	}
+	return data
 }
 
 func build_countries_response(countries []string) Countries {
