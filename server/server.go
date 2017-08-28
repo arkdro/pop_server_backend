@@ -92,10 +92,15 @@ func get_point(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
 
 func build_data_point(db *sql.DB, country string, year int) Point {
 	var data Point
-	cmd := "SELECT country_code, age FROM country_median_age where country = $1 and year = $2"
-	row := db.QueryRow(cmd, country, year)
+	date := build_date(year)
+	cmd := "SELECT country_code, age FROM country_median_age where country = ? and year = ?"
+	row := db.QueryRow(cmd, country, date)
 	data = extract_data_point_from_db_result(year, row)
 	return data
+}
+
+func build_date(year int) string {
+	return strconv.Itoa(year) + "-00-00"
 }
 
 func get_countries_from_database(db *sql.DB) []string {
