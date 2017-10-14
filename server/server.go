@@ -43,7 +43,7 @@ func (h Point_handler) ServeHTTP(writer http.ResponseWriter, req *http.Request) 
 }
 
 func write_response_countries(writer http.ResponseWriter, req *http.Request, data Countries) {
-	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	put_common_headers(writer)
 	writer.WriteHeader(http.StatusOK)
 	err := json.NewEncoder(writer).Encode(data)
 	if err != nil {
@@ -52,7 +52,7 @@ func write_response_countries(writer http.ResponseWriter, req *http.Request, dat
 }
 
 func write_response_point(writer http.ResponseWriter, req *http.Request, data Point) {
-	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	put_common_headers(writer)
 	writer.WriteHeader(http.StatusOK)
 	err := json.NewEncoder(writer).Encode(data)
 	if err != nil {
@@ -61,12 +61,16 @@ func write_response_point(writer http.ResponseWriter, req *http.Request, data Po
 }
 
 func write_response_points(writer http.ResponseWriter, req *http.Request, data Points) {
-	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	put_common_headers(writer)
 	writer.WriteHeader(http.StatusOK)
 	err := json.NewEncoder(writer).Encode(data)
 	if err != nil {
 		log.Printf("json encode points error: %v", err)
 	}
+}
+
+func put_common_headers(writer http.ResponseWriter) {
+	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
 }
 
 func get_countries(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
