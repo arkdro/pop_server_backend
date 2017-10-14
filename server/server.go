@@ -71,6 +71,7 @@ func write_response_points(writer http.ResponseWriter, req *http.Request, data P
 
 func put_common_headers(writer http.ResponseWriter) {
 	writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
 }
 
 func get_countries(writer http.ResponseWriter, request *http.Request, dbh *sql.DB) {
